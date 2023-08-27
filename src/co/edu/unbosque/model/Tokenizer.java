@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class Tokenizer {
 
@@ -20,23 +21,28 @@ public class Tokenizer {
         this.readFile = new ReadFile();
     }
 
-    public String createTokens(String tokensPath) {
-        try {
-            this.tokenInfos = new ArrayList<>();
-            ArrayList<String[]> tokens = this.readFile.obtainFileTokensData(tokensPath);
-            if (tokens.isEmpty()) return "La estructura del archivo es incorrecta";
-            for (String[] token : tokens) {
-                try {
-                    Integer.parseInt(token[2]);
-                } catch (NumberFormatException e) {
-                    return "El archivo no contiene el formato permitido";
-                }
+    public void createTokens(String tokensPath) throws NumberFormatException, IOException, LexerException, PatternSyntaxException {
+
+        this.tokenInfos = new ArrayList<>();
+        ArrayList<String[]> tokens = this.readFile.obtainFileTokensData(tokensPath);
+        if (tokens.isEmpty()) throw new LexerException("El formato de tokens es incorrecto");
+        for (String[] token : tokens) {
+            int code = Integer.parseInt(token[2]);
+            if (token[1].startsWith("TEXTO_L1TER4L")) {
+                System.out.println("sí");
+                this.tokenInfos.add(new TokenInfo(
+                        token[0],
+                        Pattern.compile("^(" + Pattern.quote(token[1].replaceAll("TEXTO_L1TER4L", "")) + ")"),
+                        code)
+                );
+            } else {
                 this.tokenInfos.add(
-                        new TokenInfo(token[0], Pattern.compile("^(" + Pattern.quote(token[1]) + ")"), Integer.parseInt(token[2])));
+                        new TokenInfo(token[0], Pattern.compile("^(" + token[1] + ")"), code));
             }
-            return "";
-        } catch (IOException e) {
-            return "Ha ocurrido un error al leer el archivo";
+        }
+        for (TokenInfo t :
+                this.tokenInfos) {
+            System.out.println(t.toString());
         }
     }
 
