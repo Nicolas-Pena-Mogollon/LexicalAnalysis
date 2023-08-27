@@ -32,6 +32,9 @@ public class ReadFile {
 
         while ((linea = br.readLine()) != null) {
             String[] items = linea.split("~");
+            if (items.length == 1 && items[0].isEmpty()) {
+                continue;
+            }
             if (items.length == 3) {
                 tokens.add(new String[]{items[0], items[1], items[2]});
 
