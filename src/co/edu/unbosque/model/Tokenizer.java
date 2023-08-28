@@ -25,6 +25,7 @@ public class Tokenizer {
 
         this.tokenInfos = new ArrayList<>();
         ArrayList<String[]> tokens = this.readFile.obtainFileTokensData(tokensPath);
+        System.out.println(tokens.size());
         if (tokens.isEmpty()) throw new LexerException("El formato de tokens es incorrecto");
         for (String[] token : tokens) {
             int code = Integer.parseInt(token[2]);
@@ -53,7 +54,6 @@ public class Tokenizer {
         int totalLength = sourceCode.length();
         tokens.clear();
         while (!sourceCode.isEmpty()) {
-            System.out.println(sourceCode);
             int remaining = sourceCode.length();
             boolean match = false;
             for (TokenInfo info : tokenInfos) {
@@ -76,6 +76,7 @@ public class Tokenizer {
     public String removeComments(String text) {
         for (TokenInfo ti : this.tokenInfos) {
             if (!ti.getName().toUpperCase().contains("COMMENT")) {
+                System.out.println(ti.getName());
                 break;
             }
             Matcher matcher = ti.getRegex().matcher(text);
