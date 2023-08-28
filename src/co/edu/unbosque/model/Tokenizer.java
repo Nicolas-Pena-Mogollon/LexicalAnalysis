@@ -25,12 +25,10 @@ public class Tokenizer {
 
         this.tokenInfos = new ArrayList<>();
         ArrayList<String[]> tokens = this.readFile.obtainFileTokensData(tokensPath);
-        System.out.println(tokens.size());
         if (tokens.isEmpty()) throw new LexerException("El formato de tokens es incorrecto");
         for (String[] token : tokens) {
             int code = Integer.parseInt(token[2]);
             if (token[1].startsWith("TEXTO_L1TER4L")) {
-                System.out.println("sí");
                 this.tokenInfos.add(new TokenInfo(
                         token[0],
                         Pattern.compile("^(" + Pattern.quote(token[1].replaceAll("TEXTO_L1TER4L", "")) + ")"),
@@ -41,16 +39,10 @@ public class Tokenizer {
                         new TokenInfo(token[0], Pattern.compile("^(" + token[1] + ")"), code));
             }
         }
-        for (TokenInfo t :
-                this.tokenInfos) {
-            System.out.println(t.toString());
-        }
     }
 
     public void tokenize(String sourcePath) throws IOException {
-        String sourceCode = "";
-        sourceCode = this.readFile.obtainFileData(sourcePath);
-        sourceCode = this.removeComments(sourceCode).trim();
+        String sourceCode = this.readFile.obtainFileData(sourcePath).trim();
         int totalLength = sourceCode.length();
         tokens.clear();
         while (!sourceCode.isEmpty()) {
@@ -62,6 +54,9 @@ public class Tokenizer {
                     match = true;
                     String tok = m.group().trim();
                     sourceCode = m.replaceFirst("").trim();
+                    if (info.getName().contains("COMMENT")) {
+                        break;
+                    }
                     int startPos = totalLength - remaining;
                     tokens.add(new Token(info.getCode(), tok, startPos, startPos + tok.length()));
                     break;
@@ -71,18 +66,6 @@ public class Tokenizer {
                 throw new LexerException("Unexpected character in input: " + sourceCode);
             }
         }
-    }
-
-    public String removeComments(String text) {
-        for (TokenInfo ti : this.tokenInfos) {
-            if (!ti.getName().toUpperCase().contains("COMMENT")) {
-                System.out.println(ti.getName());
-                break;
-            }
-            Matcher matcher = ti.getRegex().matcher(text);
-            text = matcher.replaceAll("");
-        }
-        return text;
     }
 
     public String[][] generateTokensList() {
